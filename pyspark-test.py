@@ -517,3 +517,12 @@ spark = hive_spark('statistics')
 date = (datetime.date.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")  # yesterday
 days = -90
 
+query_content_count_df = load_data_frame(spark, f'{medium_path}/query_content_count')
+query_count_df = load_data_frame(spark, f'{medium_path}/query_count')
+len_coef_df = load_data_frame(spark, f'{medium_path}/len_coef')
+content2words_df = load_data_frame(spark, f'{medium_path}/content2words')
+rewrited_query_v2_df = load_data_frame(spark, f'{medium_path}/rewrited_query_v2')
+content_similarity_df = load_data_frame(spark, f'{medium_path}/content_similarity_v2')
+q2q_by_content_df = load_data_frame(spark, f'{medium_path}/q2q_by_content_v2')
+top_q2q_by_content_df = load_data_frame(spark, f'{medium_path}/top_q2q_by_content_v2')
+q2q_df = load_data_frame(spark, f'{medium_path}/q2q_merge_v2')

@@ -233,7 +233,7 @@ def gen_len_coef(spark):
     len_coef_df = spark.createDataFrame(temp, schema=['length', 'coef'])
     return len_coef_df
 
-def get_content2words(query_content_count):
+def get_content2words(query_content_count, len_coef_df):
     query_score_df = query_content_count.withColumn('length', F.length('query')).join(len_coef_df, 'length').withColumn(
         'score', F.expr('count*coef'))
     w = W.partitionBy('content_id')

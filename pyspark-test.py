@@ -263,8 +263,17 @@ def is_sub_text(query1, query2):
     else:
         return True
 
+def sort_list(struct_list):
+    return str([x[0] for x in sorted(struct_list, key=lambda x: x[1], reverse=True)])
+
+def list_filter(_str_prev):
+    _str_prev = re.sub(r'\"', '', _str_prev)
+    return re.sub(r'\'', '', _str_prev)
+
 normalize_query_udf = F.udf(normalize_query, StringType())
 is_sub_text_udf = F.udf(is_sub_text, BooleanType())
+sort_list_udf = F.udf(sort_list, StringType())
+list_filter_udf = F.udf(list_filter, StringType())
 
 import pyspark.sql.functions as F
 from pyspark.sql.window import Window as W
@@ -408,7 +417,13 @@ def filter_q2q(q2q_df, query_content_count_df):
     query_info_df.unpersist()
     return q2q_filtered_df
 
-
+def get_q2q_output(q2q_final_df):
+    return q2q_final_df.groupBy("query", "query2") \
+        .agg(F.sum("weight").alias("weight")) \
+        .groupBy('query') \
+        .agg(F.collect_list(F.struct("query2", "weight")).alias("query_list")) \
+        .withColumn('related_queries', sort_list_udf('query_list')).drop('query_list') \
+        .withColumn("related_queries", list_filter_udf("related_queries"))
 
 
 def load_cms_metadata(spark, movie_table, tv_show_table, tv_season_table, episode_table, tournament_table,
@@ -516,13 +531,15 @@ spark = hive_spark('statistics')
 
 date = (datetime.date.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")  # yesterday
 days = -90
+debug = 0
 
-query_content_count_df = load_data_frame(spark, f'{medium_path}/query_content_count')
-query_count_df = load_data_frame(spark, f'{medium_path}/query_count')
-len_coef_df = load_data_frame(spark, f'{medium_path}/len_coef')
-content2words_df = load_data_frame(spark, f'{medium_path}/content2words')
-rewrited_query_v2_df = load_data_frame(spark, f'{medium_path}/rewrited_query_v2')
-content_similarity_df = load_data_frame(spark, f'{medium_path}/content_similarity_v2')
-q2q_by_content_df = load_data_frame(spark, f'{medium_path}/q2q_by_content_v2')
-top_q2q_by_content_df = load_data_frame(spark, f'{medium_path}/top_q2q_by_content_v2')
-q2q_df = load_data_frame(spark, f'{medium_path}/q2q_merge_v2')
+if debug:
+    query_content_count_df = load_data_frame(spark, f'{medium_path}/query_content_count')
+    query_count_df = load_data_frame(spark, f'{medium_path}/query_count')
+    len_coef_df = load_data_frame(spark, f'{medium_path}/len_coef')
+    content2words_df = load_data_frame(spark, f'{medium_path}/content2words')
+    rewrited_query_v2_df = load_data_frame(spark, f'{medium_path}/rewrited_query_v2')
+    content_similarity_df = load_data_frame(spark, f'{medium_path}/content_similarity_v2')
+    q2q_by_content_df = load_data_frame(spark, f'{medium_path}/q2q_by_content_v2')
+    top_q2q_by_content_df = load_data_frame(spark, f'{medium_path}/top_q2q_by_content_v2')
+    q2q_df = load_data_frame(spark, f'{medium_path}/q2q_merge_v2')

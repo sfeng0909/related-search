@@ -242,4 +242,12 @@ def get_content2words(query_content_count, len_coef_df):
         .drop('maxscore').select(F.col('query').alias('better_query'), 'content_id')
     return content2words_df
 
+def get_q2q_output(q2q_final_df):
+    return q2q_final_df.groupBy("query", "query2") \
+        .agg(F.sum("weight").alias("weight")) \
+        .groupBy('query') \
+        .agg(F.collect_list(F.struct("query2", "weight")).alias("query_list")) \
+        .withColumn('related_queries', sort_list_udf('query_list')).drop('query_list') \
+        .withColumn("related_queries", list_filter_udf("related_queries"))
+
 

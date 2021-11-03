@@ -22,8 +22,17 @@ def is_sub_text(query1, query2):
     else:
         return True
 
+def sort_list(struct_list):
+    return str([x[0] for x in sorted(struct_list, key=lambda x: x[1], reverse=True)])
+
+def list_filter(_str_prev):
+    _str_prev = re.sub(r'\"', '', _str_prev)
+    return re.sub(r'\'', '', _str_prev)
+
 normalize_query_udf = F.udf(normalize_query, StringType())
 is_sub_text_udf = F.udf(is_sub_text, BooleanType())
+sort_list_udf = F.udf(sort_list, StringType())
+list_filter_udf = F.udf(list_filter, StringType())
 
 
 

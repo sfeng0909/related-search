@@ -1,5 +1,4 @@
 import pyspark.sql.functions as F
-from pyspark.sql.window import Window as W
 import math
 from udf import *
 from common_utils import *

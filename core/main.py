@@ -2,7 +2,7 @@ from path import *
 from utils import *
 import os
 # spark = SparkSession.builder.getOrCreate()
-# spark.stop()
+spark.stop()
 spark = hive_spark('statistics')
 
 date = (datetime.date.today() + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")  # yesterday
